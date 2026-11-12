@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Yboost2, portfolio de projets web, data et JavaScript.">
+  <meta name="theme-color" content="#10191f">
+  <title>Yboost2 — Portfolio</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <nav class="site-nav" aria-label="Navigation principale">
+    <a class="brand" href="./index.html"><span>Y</span>boost2</a>
+    <div class="nav-links">
+      <a href="#projets-title">Travaux</a>
+      <a href="#rapport-title">À propos</a>
+      <a class="nav-cta" href="#contact-title">Parlons-nous</a>
+    </div>
+  </nav>
+  <header>
+    <div class="hero-orbit" aria-hidden="true"></div>
+    <div class="hero-content">
+      <p class="hero-kicker">Studio numérique indépendant · 2026</p>
+      <h1>Des idées qui<br><em>prennent forme.</em></h1>
+      <p class="hero-description">Yboost2 conçoit des expériences web sensibles, utiles et précises — de la première intention au dernier détail.</p>
+      <a class="hero-link" href="#projets-title">Découvrir les travaux <span>↘</span></a>
+    </div>
+    <p class="visit-count">Visites <strong id="visites">0</strong></p>
+  </header>
+
+  <main id="contenu">
+    <div class="trust-strip" aria-label="Engagements">
+      <span><b>01</b> Clarté</span>
+      <span><b>02</b> Précision</span>
+      <span><b>03</b> Curiosité</span>
+    </div>
+    <div class="content-layout">
+      <section class="projects-panel" aria-labelledby="projets-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Sélection</p>
+            <h2 id="projets-title">Projets choisis</h2>
+          </div>
+          <span class="section-index">01</span>
+        </div>
+        <p class="section-intro">Des expériences web entre interface, données et expérimentation.</p>
+        <div class="project-controls">
+          <label for="categorie">Explorer par catégorie</label>
+          <select id="categorie">
+            <option value="toutes">Toutes les catégories</option>
+            <option value="web">Web</option>
+            <option value="data">Data</option>
+            <option value="jeu">Jeu</option>
+          </select>
+          <button id="trier" type="button">Classer par année</button>
+        </div>
+        <ul id="projets" aria-live="polite"></ul>
+      </section>
+
+      <aside class="side-column">
+        <section class="report-panel" aria-labelledby="rapport-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Repères</p>
+              <h2 id="rapport-title">Rapport</h2>
+            </div>
+            <span class="section-index">02</span>
+          </div>
+          <p class="section-intro">Une lecture synthétique du catalogue présenté.</p>
+          <pre id="rapport"></pre>
+        </section>
+
+        <section class="contact-panel" aria-labelledby="contact-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Échange</p>
+              <h2 id="contact-title">Nous contacter</h2>
+            </div>
+            <span class="section-index">03</span>
+          </div>
+          <p class="section-intro">Une idée ou une collaboration à imaginer ? Écrivons la suite.</p>
+          <form id="contact">
+            <label for="nom">Nom</label>
+            <input id="nom" name="nom" autocomplete="name" required>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+            <button type="submit">Envoyer le message</button>
+            <p id="resultat" role="status"></p>
+          </form>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <p>Yboost2 · Portfolio et outils JavaScript</p>
+    <p>© 2026</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript-message">Activez JavaScript pour consulter les projets et utiliser le formulaire de contact.</p>
+  </noscript>
+
+  <script type="module">
+    import { incrementer } from './Src/compteur.js';
+    import { filtrerProjets, trierParAnnee } from './Src/filtre.js';
+    import { rapport } from './Src/rapport.js';
+    import { validerFormulaire } from './Src/validation.js';
+
+    const projets = [
+      { titre: 'Portfolio', categorie: 'web', annee: 2025 },
+      { titre: 'Météo', categorie: 'web', annee: 2026 },
+      { titre: 'Analyse de données', categorie: 'data', annee: 2024 },
+      { titre: 'Jeu de mémoire', categorie: 'jeu', annee: 2023 },
+    ];
+
+    const stockage = {
+      getItem: (cle) => localStorage.getItem(cle),
+      setItem: (cle, valeur) => localStorage.setItem(cle, valeur),
+    };
+
+    if (localStorage.getItem('visites') === null) {
+      localStorage.setItem('visites', '0');
+    }
+    document.querySelector('#visites').textContent = incrementer(stockage);
+
+    const liste = document.querySelector('#projets');
+    const sortieRapport = document.querySelector('#rapport');
+    const selectCategorie = document.querySelector('#categorie');
+
+    function afficherProjets() {
+      const filtres = filtrerProjets(projets, selectCategorie.value);
+      liste.replaceChildren(...filtres.map((projet) => {
+        const element = document.createElement('li');
+        element.textContent = `${projet.titre} — ${projet.categorie} (${projet.annee})`;
+        return element;
+      }));
+      sortieRapport.textContent = rapport(projets);
+    }
+
+    selectCategorie.addEventListener('change', afficherProjets);
+    document.querySelector('#trier').addEventListener('click', () => {
+      projets.splice(0, projets.length, ...trierParAnnee(projets));
+      afficherProjets();
+    });
+
+    document.querySelector('#contact').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formulaire = new FormData(event.currentTarget);
+      const erreurs = validerFormulaire({
+        nom: formulaire.get('nom'),
+        email: formulaire.get('email'),
+        message: formulaire.get('message'),
+      });
+      const resultat = document.querySelector('#resultat');
+      resultat.className = Object.keys(erreurs).length === 0 ? 'success' : 'error';
+      resultat.textContent = Object.values(erreurs).join(' — ') || 'Formulaire valide.';
+    });
+
+    afficherProjets();
+  </script>
+</body>
+</html>
